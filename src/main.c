@@ -35,6 +35,7 @@ gboolean fullscreen = FALSE;
 gboolean mouse = FALSE;
 gboolean clipboard = FALSE;
 gboolean upload_imgur = FALSE;
+gboolean upload_ipfs = FALSE;
 gchar *screenshot_dir = NULL;
 gchar *application = NULL;
 gint delay = 0;
@@ -83,6 +84,11 @@ static GOptionEntry entries[] =
   },
   {
     "imgur", 'i', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_NONE, &upload_imgur,
+    N_("Host the screenshot on Imgur, a free online image hosting service"),
+    NULL
+  },
+  {
+    "ipfs", 'i', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_NONE, &upload_ipfs,
     N_("Host the screenshot on Imgur, a free online image hosting service"),
     NULL
   },
@@ -236,6 +242,16 @@ int main (int argc, char **argv)
       return EXIT_FAILURE;
     }
 
+  else if (upload_ipfs && (screenshot_dir != NULL))
+    {
+      g_printerr (conflict_error, "ipfs", "save");
+      return EXIT_FAILURE;
+    }
+  else if (upload_ipfs && (application != NULL))
+    {
+      g_printerr (conflict_error, "ipfs", "open");
+      return EXIT_FAILURE;
+    }
   /* Warn that action options, mouse and delay will be ignored in
    * non-cli mode */
   if ((application != NULL) && !(fullscreen || window || region))
@@ -244,6 +260,8 @@ int main (int argc, char **argv)
     g_printerr (ignore_error, "save");
   if (upload_imgur && !(fullscreen || window || region))
     g_printerr (ignore_error, "imgur");
+  if (upload_ipfs && !(fullscreen || window || region))
+    g_printerr (ignore_error, "ipfs");
   if (clipboard && !(fullscreen || window || region))
     g_printerr (ignore_error, "clipboard");
   if (delay && !(fullscreen || window || region))
@@ -306,6 +324,11 @@ int main (int argc, char **argv)
           sd->action = UPLOAD_IMGUR;
           sd->action_specified = TRUE;
         }
+	  else if (upload_ipfs)
+	  {
+		  sd->action = UPLOAD_IPFS;
+		  sd->action_specified = TRUE;
+	  }
       else if (screenshot_dir != NULL)
         {
           sd->action = SAVE;

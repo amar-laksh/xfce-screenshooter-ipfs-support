@@ -125,6 +125,8 @@ gboolean screenshooter_action_idle (ScreenshotData *sd)
             screenshooter_open_screenshot (screenshot_path, sd->app, sd->app_info);
           else if (sd->action & UPLOAD_IMGUR)
             screenshooter_upload_to_imgur (screenshot_path, sd->title);
+		  else if (sd->action & UPLOAD_IPFS)
+            screenshooter_upload_to_ipfs (screenshot_path, sd->title);
         }
 
       g_object_unref (temp_dir);
