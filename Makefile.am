@@ -33,7 +33,8 @@ lib_libscreenshooter_la_SOURCES =	\
 	lib/screenshooter-job-callbacks.c lib/screenshooter-job-callbacks.h \
 	lib/screenshooter-simple-job.c lib/screenshooter-simple-job.h \
 	lib/screenshooter-utils.c lib/screenshooter-utils.h \
-	lib/screenshooter-imgur.c lib/screenshooter-imgur.h
+	lib/screenshooter-imgur.c lib/screenshooter-imgur.h \
+	lib/screenshooter-ipfs.c  lib/screenshooter-ipfs.h
 
 lib_libscreenshooter_la_CFLAGS = \
 	-I$(top_srcdir) \
@@ -44,6 +45,7 @@ lib_libscreenshooter_la_CFLAGS = \
 	@LIBXFCE4UTIL_CFLAGS@ \
 	@LIBXFCE4UI_CFLAGS@ \
 	@LIBXML_CFLAGS@ \
+	@JSON_GLIB_CFLAGS@ \
 	@SOUP_CFLAGS@ \
 	@XFIXES_CFLAGS@ \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"
@@ -57,6 +59,7 @@ lib_libscreenshooter_la_LIBADD = \
 	@GLIB_LIBS@ \
 	@SOUP_LIBS@ \
 	@LIBXML_LIBS@ \
+	@JSON_GLIB_LIBS@ \
 	@LIBXEXT_LIBS@ \
 	@LIBX11_LIBS@ \
 	@XFIXES_LIBS@
@@ -95,6 +98,7 @@ src_xfce4_screenshooter_CFLAGS = \
 	@GTHREAD_CFLAGS@ \
 	@SOUP_CFLAGS@ \
 	@LIBXML_CFLAGS@ \
+	@JSON_GLIB_CFLAGS@ \
 	-DPACKAGE_LOCALE_DIR=\"$(localedir)\"
 
 src_xfce4_screenshooter_LDFLAGS = \
@@ -139,6 +143,7 @@ panel_plugin_libscreenshooterplugin_la_CFLAGS =	\
 	@LIBXFCE4UI_CFLAGS@ \
 	@GTHREAD_CFLAGS@ \
 	@LIBXML_CFLAGS@ \
+	@JSON_GLIB_CFLAGS@ \
 	@SOUP_CFLAGS@
 
 panel_plugin_libscreenshooterplugin_la_LDFLAGS = \
@@ -154,6 +159,7 @@ panel_plugin_libscreenshooterplugin_la_LIBADD = \
 	@GTHREAD_LIBS@ \
 	@SOUP_LIBS@ \
 	@LIBXML_LIBS@ \
+	@JSON_GLIB_LIBS@ \
 	@LIBXFCE4UI_LIBS@ \
 	lib/libscreenshooter.la
 

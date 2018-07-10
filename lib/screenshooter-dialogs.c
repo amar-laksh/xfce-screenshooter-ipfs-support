@@ -55,6 +55,10 @@ cb_clipboard_toggled               (GtkToggleButton    *tb,
 static void
 cb_imgur_toggled                   (GtkToggleButton    *tb,
                                     ScreenshotData     *sd);
+
+static void
+cb_ipfs_toggled                   (GtkToggleButton    *tb,
+                                    ScreenshotData     *sd);
 static void
 cb_delay_spinner_changed           (GtkWidget          *spinner,
                                     ScreenshotData     *sd);
@@ -188,6 +192,12 @@ static void cb_imgur_toggled (GtkToggleButton *tb, ScreenshotData *sd)
 {
   if (gtk_toggle_button_get_active (tb))
     sd->action = UPLOAD_IMGUR;
+}
+
+static void cb_ipfs_toggled (GtkToggleButton *tb, ScreenshotData *sd)
+{
+  if (gtk_toggle_button_get_active (tb))
+    sd->action = UPLOAD_IPFS;
 }
 
 
@@ -913,6 +923,7 @@ GtkWidget *screenshooter_actions_dialog_new (ScreenshotData *sd)
   GtkWidget *save_radio_button;
   GtkWidget *clipboard_radio_button, *open_with_radio_button;
   GtkWidget *imgur_radio_button;
+  GtkWidget *ipfs_radio_button;
 
   GtkListStore *liststore;
   GtkWidget *combobox;
@@ -986,7 +997,7 @@ GtkWidget *screenshooter_actions_dialog_new (ScreenshotData *sd)
   actions_grid = gtk_grid_new ();
   gtk_container_add (GTK_CONTAINER (actions_alignment), actions_grid);
 
-  gtk_grid_set_row_spacing (GTK_GRID (actions_grid), 6);
+  gtk_grid_set_row_spacing (GTK_GRID (actions_grid), 7);
   gtk_grid_set_column_spacing (GTK_GRID (actions_grid), 6);
   gtk_container_set_border_width (GTK_CONTAINER (actions_grid), 0);
 
@@ -1063,6 +1074,19 @@ GtkWidget *screenshooter_actions_dialog_new (ScreenshotData *sd)
   g_signal_connect (G_OBJECT (imgur_radio_button), "toggled",
                     G_CALLBACK (cb_imgur_toggled), sd);
   gtk_grid_attach (GTK_GRID (actions_grid), imgur_radio_button, 0, 4, 1, 1);
+
+  /* Upload to ipfs radio button */
+  ipfs_radio_button =
+    gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON (save_radio_button),
+                                                 _("Host on IPFS"));
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ipfs_radio_button),
+                                (sd->action & UPLOAD_IPFS));
+  gtk_widget_set_tooltip_text (ipfs_radio_button,
+                               _("Host the screenshot on IPFS, a free online "
+                                 "image hosting service"));
+  g_signal_connect (G_OBJECT (ipfs_radio_button), "toggled",
+                    G_CALLBACK (cb_ipfs_toggled), sd);
+  gtk_grid_attach (GTK_GRID (actions_grid), ipfs_radio_button, 0, 5, 1, 1);
 
   /* Preview box */
   preview_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);

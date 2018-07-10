@@ -56,6 +56,7 @@ XDT_CHECK_PACKAGE([LIBXML], [libxml-2.0], [2.4.0])
 XDT_CHECK_PACKAGE([EXO], [exo-2], [0.11.0])
 XDT_CHECK_PACKAGE([LIBXEXT], [xext], [1.0.0])
 XDT_CHECK_OPTIONAL_PACKAGE([XFIXES], [xfixes], [4.0.0], [xfixes], [XFIXES extension support])
+XDT_CHECK_OPTIONAL_PACKAGE([JSON_GLIB], [json-glib-1.0], [1.0.0], [json-glib], [json-glib for ipfs support])
 XDT_CHECK_LIBX11()
 
 dnl ******************************
