@@ -53,6 +53,11 @@ void
 cb_image_uploaded                  (ScreenshooterJob  *job,
                                     gchar             *upload_name,
                                     gchar            **last_user);
+
+void
+cb_image_ipfs_uploaded                  (ScreenshooterJob  *job,
+                                    gchar             *upload_name,
+                                    gchar            **last_user);
 void
 cb_ask_for_information             (ScreenshooterJob  *job,
                                     GtkListStore      *liststore,

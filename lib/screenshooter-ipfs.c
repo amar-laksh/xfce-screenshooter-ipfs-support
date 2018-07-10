@@ -23,15 +23,47 @@
 #include <string.h>
 #include <stdlib.h>
 #include <libsoup/soup.h>
-#include <libxml/parser.h>
+#include <json-glib/json-glib.h>
+
 
 static gboolean          ipfs_upload_job          (ScreenshooterJob  *job,
                                                     GArray            *param_values,
                                                     GError           **error);
 
+
+
+static char
+*get_image_url(const char* json)
+{
+	JsonParser *parser;
+	JsonNode *root;
+	GError *error;
+	gchar *ret = NULL;
+	parser = json_parser_new ();
+
+	error = NULL;
+	json_parser_load_from_data(parser, json, strlen(json), &error);
+
+	if (error)
+	{
+		g_error_free (error);
+		g_object_unref (parser);
+		return NULL;
+	}
+
+	root = json_parser_get_root (parser);
+	if (JSON_NODE_TYPE(root) == JSON_NODE_OBJECT) {
+		JsonNode *hash = json_object_get_member(json_node_get_object(root), "Hash");
+		ret = json_node_dup_string(hash);
+	}
+	g_object_unref (parser);
+	return ret;
+}
+
 static gboolean
 ipfs_upload_job (ScreenshooterJob *job, GArray *param_values, GError **error)
 {
+
   const gchar *image_path, *title;
   gchar *online_file_name = NULL;
   const gchar* proxy_uri;
@@ -45,8 +77,6 @@ ipfs_upload_job (ScreenshooterJob *job, GArray *param_values, GError **error)
   SoupBuffer *buf;
   GMappedFile *mapping;
   SoupMultipart *mp;
-  xmlDoc *doc;
-  xmlNode *root_node, *child_node;
 
   const gchar *upload_url = "https://api.globalupload.io/transport/add";
 
@@ -95,13 +125,13 @@ ipfs_upload_job (ScreenshooterJob *job, GArray *param_values, GError **error)
                                     g_mapped_file_get_length (mapping),
                                     mapping, (GDestroyNotify)g_mapped_file_unref);
 
-  soup_multipart_append_form_file (mp, "image", NULL, NULL, buf);
-  soup_multipart_append_form_string (mp, "name", title);
-  soup_multipart_append_form_string (mp, "title", title);
+
+  soup_multipart_append_form_string (mp, "name", "keyphrase");
+  soup_multipart_append_form_string (mp, "name", "user");
+  soup_multipart_append_form_file (mp, "file", image_path, NULL, buf);
+
   msg = soup_form_request_new_from_multipart (upload_url, mp);
 
-  // for v3 API - key registered *only* for xfce4-screenshooter!
-  soup_message_headers_append (msg->request_headers, "Authorization", "Client-ID 66ab680b597e293");
   exo_job_info_message (EXO_JOB (job), _("Upload the screenshot..."));
   status = soup_session_send_message (session, msg);
 
@@ -120,18 +150,9 @@ ipfs_upload_job (ScreenshooterJob *job, GArray *param_values, GError **error)
 
       return FALSE;
     }
-
-  TRACE("response was %s\n", msg->response_body->data);
+  online_file_name = get_image_url (msg->response_body->data);
   /* returned XML is like <data type="array" success="1" status="200"><id>xxxxxx</id> */
-  doc = xmlParseMemory(msg->response_body->data,
-                                  strlen(msg->response_body->data));
 
-  root_node = xmlDocGetRootElement(doc);
-  for (child_node = root_node->children; child_node; child_node = child_node->next)
-    if (xmlStrEqual(child_node->name, (const xmlChar *) "id"))
-       online_file_name = xmlNodeGetContent(child_node);
-  TRACE("found picture id %s\n", online_file_name);
-  xmlFreeDoc(doc);
   soup_buffer_free (buf);
   g_object_unref (session);
   g_object_unref (msg);
@@ -174,7 +195,7 @@ void screenshooter_upload_to_ipfs   (const gchar  *image_path,
   g_signal_connect_swapped (job, "image-uploaded", G_CALLBACK (gtk_widget_hide), dialog);
 
   g_signal_connect (job, "ask", G_CALLBACK (cb_ask_for_information), NULL);
-  g_signal_connect (job, "image-uploaded", G_CALLBACK (cb_image_uploaded), NULL);
+  g_signal_connect (job, "image-uploaded", G_CALLBACK (cb_image_ipfs_uploaded), NULL);
   g_signal_connect (job, "error", G_CALLBACK (cb_error), NULL);
   g_signal_connect (job, "finished", G_CALLBACK (cb_finished), dialog);
   g_signal_connect (job, "info-message", G_CALLBACK (cb_update_info), label);
